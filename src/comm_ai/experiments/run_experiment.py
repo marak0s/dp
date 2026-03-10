@@ -99,7 +99,7 @@ def _ensure_neural_models(cfg: dict[str, Any], ds: SignalsDataset, out_dir: Path
 def _run_metadata(cfg: dict[str, Any]) -> dict[str, Any]:
     commit = "unknown"
     try:
-        commit = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+        commit = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True, stderr=subprocess.DEVNULL).strip()
     except Exception:
         pass
     return {

@@ -26,6 +26,10 @@ python -m comm_ai.training.train_neural_bcjr --config src/comm_ai/config/experim
 
 Также `run_experiment` может автоматически обучать модели, если `training.enabled: true`.
 
+Важно: `train_neural_viterbi` и `train_neural_bcjr` по умолчанию ожидают, что уже существует
+`signals.npz` в `outputs/runs/<run_name>/signals.npz` (если не передан `--dataset`).
+Обычно это делается предварительным запуском `run_experiment` для генерации сигналов.
+
 ## Как использовать сохранённые сигналы
 
 1. Запустить эксперимент и получить `signals.npz`.
@@ -55,8 +59,8 @@ python -m comm_ai.training.train_neural_bcjr --config src/comm_ai/config/experim
 ## Запуск в Google Colab
 
 ```python
-!git clone https://github.com/<your-org>/<your-repo>.git
-%cd <your-repo>
+!git clone https://github.com/marak0s/dp.git
+%cd dp
 !pip install -e ".[notebooks]"
 !python -m comm_ai.experiments.run_experiment --config src/comm_ai/config/experiments/awgn_small.yaml
 ```
