@@ -1,0 +1,14 @@
+code:
+  constraint_length: 7
+  polynomials: [171, 133]
+  rate: 0.5
+experiment:
+  K: 128
+  num_blocks: 100
+  snr_db_list: [-1, 0, 1, 2, 3, 4]
+  seed: 42
+  batch_size: 16
+  decoders: [viterbi, bcjr, neural_viterbi, neural_bcjr]
+  run_name: default_run
+paths:
+  outputs_root: outputs/runs
