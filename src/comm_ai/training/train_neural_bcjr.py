@@ -63,24 +63,19 @@ def train_neural_bcjr_model(
     return history
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", required=True)
-    parser.add_argument("--dataset", default=None)
-    args = parser.parse_args()
 
-    cfg: dict[str, Any] = load_yaml(args.config)
+
+def train_from_config(cfg: dict[str, Any], dataset_path: str | Path | None = None) -> tuple[Path, list[float]]:
+    """Notebook-friendly training API: train model from config and return checkpoint path + history."""
     set_seed(cfg["experiment"]["seed"])
+    ds_path = Path(dataset_path) if dataset_path else Path(cfg["paths"]["outputs_root"]) / cfg["experiment"]["run_name"] / "signals.npz"
+    if not ds_path.exists():
+        raise FileNotFoundError(f"Dataset not found: {ds_path}. Run experiment generation first or pass dataset_path.")
 
-    dataset_path = Path(args.dataset) if args.dataset else Path(cfg["paths"]["outputs_root"]) / cfg["experiment"]["run_name"] / "signals.npz"
-    if not dataset_path.exists():
-        raise FileNotFoundError(f"Dataset not found: {dataset_path}. Run experiment generation first or pass --dataset.")
-
-    ds = SignalsDataset.load(dataset_path)
+    ds = SignalsDataset.load(ds_path)
     n_out = len(cfg["code"]["polynomials"])
     train_cfg = cfg.get("training", {})
     model = NeuralBCJRDecoder(n_out=n_out, hidden=train_cfg.get("hidden_dim", 16))
-
     ckpt = Path(cfg["paths"]["outputs_root"]) / cfg["experiment"]["run_name"] / "checkpoints" / "best_neural_bcjr.pt"
     history = train_neural_bcjr_model(
         model=model,
@@ -91,6 +86,16 @@ def main() -> None:
         checkpoint_path=ckpt,
         train_snr_db_list=train_cfg.get("train_snr_db_list"),
     )
+    return ckpt, history
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", required=True)
+    parser.add_argument("--dataset", default=None)
+    args = parser.parse_args()
+
+    cfg: dict[str, Any] = load_yaml(args.config)
+    ckpt, history = train_from_config(cfg, dataset_path=args.dataset)
     print(f"Saved checkpoint: {ckpt}")
     print(f"Final loss: {history[-1]:.6f}")
 

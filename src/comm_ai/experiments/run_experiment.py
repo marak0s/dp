@@ -18,6 +18,7 @@ from comm_ai.training.train_neural_bcjr import train_neural_bcjr_model
 from comm_ai.training.train_neural_viterbi import train_neural_viterbi_model
 from comm_ai.utils.io import load_yaml, save_yaml
 from comm_ai.utils.plotting import save_metric_plot
+from comm_ai.utils.reporting import analysis_md, config_overview_md, metric_columns_description_md
 from comm_ai.utils.seed import set_seed
 
 
@@ -164,8 +165,13 @@ def run(config_path: str) -> Path:
             "checkpoints/best_neural_bcjr.pt",
         ]:
             f.write(f"- {item}\n")
-        f.write("\n## Results\n\n")
+        f.write("\n")
+        f.write(config_overview_md(cfg) + "\n\n")
+        f.write(metric_columns_description_md() + "\n")
+        f.write("## Results table\n\n")
         f.write(df.to_markdown(index=False))
+        f.write("\n\n")
+        f.write(analysis_md(df) + "\n")
     return out_dir
 
 
