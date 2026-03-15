@@ -169,7 +169,10 @@ def run(config_path: str) -> Path:
         f.write(config_overview_md(cfg) + "\n\n")
         f.write(metric_columns_description_md() + "\n")
         f.write("## Results table\n\n")
-        f.write(df.to_markdown(index=False))
+        try:
+            f.write(df.to_markdown(index=False))
+        except ImportError:
+            f.write(df.to_string(index=False))
         f.write("\n\n")
         f.write(analysis_md(df) + "\n")
     return out_dir

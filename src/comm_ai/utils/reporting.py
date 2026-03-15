@@ -6,15 +6,15 @@ import pandas as pd
 
 
 def metric_columns_description_md() -> str:
-    return """## Columns description
+    return """## Расшифровка столбцов таблицы
 
-- `decoder` — название алгоритма декодирования.
-- `snr_db` — отношение сигнал/шум в децибелах.
-- `ber` — bit error rate, доля ошибочно восстановленных битов (меньше — лучше).
-- `fer` — frame error rate, доля блоков с хотя бы одной ошибкой (меньше — лучше).
-- `decode_time_s` — среднее время декодирования одного блока в секундах (меньше — быстрее).
-- `complexity_proxy` — прокси-оценка сложности, пропорциональная числу состояний trellis и длине блока.
-- `trained_model_used` — использовалась ли обученная нейронная модель для этого декодера.
+- `decoder` - название алгоритма декодирования.
+- `snr_db` - SNR в децибелах.
+- `ber` - доля ошибочно восстановленных битов (меньше - лучше).
+- `fer` - доля блоков с хотя бы одной ошибкой (меньше - лучше).
+- `decode_time_s` - среднее время декодирования в секундах (меньше - быстрее).
+- `complexity_proxy` - прокси-оценка сложности (состояния trellis x длина блока).
+- `trained_model_used` - признак использования обученной neural-модели.
 """
 
 
@@ -28,14 +28,13 @@ def analyze_results(df: pd.DataFrame) -> dict[str, str]:
     best_fer = grouped.loc[grouped["fer"].idxmin(), "decoder"]
     fastest = grouped.loc[grouped["decode_time_s"].idxmin(), "decoder"]
 
-    tradeoff = ""
     if len({best_ber, fastest}) > 1:
         tradeoff = (
-            f"По качеству (BER) лидирует `{best_ber}`, по скорости — `{fastest}`; "
-            "наблюдается компромисс качество/время."
+            f"По качеству (BER) лидирует `{best_ber}`, по скорости - `{fastest}`. "
+            "Наблюдается компромисс качество/время."
         )
     else:
-        tradeoff = f"`{best_ber}` одновременно лидирует по BER и времени в среднем по SNR."
+        tradeoff = f"`{best_ber}` лидирует и по BER, и по времени в среднем по SNR."
 
     return {
         "best_ber": str(best_ber),
@@ -50,16 +49,16 @@ def config_overview_md(cfg: dict[str, Any]) -> str:
     tr = cfg.get("training", {})
     return "\n".join(
         [
-            "## Experiment configuration overview",
+            "## Краткий обзор конфига",
             "",
-            f"- `K={exp.get('K')}` — длина информационного блока в битах.",
-            f"- `num_blocks={exp.get('num_blocks')}` — число блоков на каждую SNR-точку.",
-            f"- `snr_db_list={exp.get('snr_db_list')}` — сетка SNR для оценки.",
-            f"- `decoders={exp.get('decoders')}` — какие декодеры запускались.",
-            f"- `seed={exp.get('seed')}` — seed для воспроизводимости генерации сигналов.",
-            f"- `training.enabled={tr.get('enabled')}` — включено ли обучение neural-компонентов.",
-            f"- `training.epochs={tr.get('epochs')}` — число эпох обучения.",
-            f"- `training.learning_rate={tr.get('learning_rate')}` — шаг обучения optimizer'а.",
+            f"- `K={exp.get('K')}` - длина информационного блока в битах.",
+            f"- `num_blocks={exp.get('num_blocks')}` - число блоков на каждую SNR-точку.",
+            f"- `snr_db_list={exp.get('snr_db_list')}` - сетка SNR для оценки.",
+            f"- `decoders={exp.get('decoders')}` - запущенные декодеры.",
+            f"- `seed={exp.get('seed')}` - seed воспроизводимости генерации сигналов.",
+            f"- `training.enabled={tr.get('enabled')}` - включено ли обучение neural-компонентов.",
+            f"- `training.epochs={tr.get('epochs')}` - число эпох обучения.",
+            f"- `training.learning_rate={tr.get('learning_rate')}` - шаг optimizer."
         ]
     )
 
@@ -68,11 +67,11 @@ def analysis_md(df: pd.DataFrame) -> str:
     a = analyze_results(df)
     return "\n".join(
         [
-            "## Auto analysis",
+            "## Итог по качеству и скорости",
             "",
-            f"- Лучший по BER: `{a['best_ber']}`.",
-            f"- Лучший по FER: `{a['best_fer']}`.",
-            f"- Самый быстрый: `{a['fastest']}`.",
+            f"- Лучший алгоритм по BER: `{a['best_ber']}`.",
+            f"- Лучший алгоритм по FER: `{a['best_fer']}`.",
+            f"- Самый быстрый алгоритм: `{a['fastest']}`.",
             f"- Интерпретация: {a['tradeoff']}",
         ]
     )
